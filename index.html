@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="light" data-color="default"> <!-- Atributos para tema -->
+<html lang="pt-BR" data-theme="light" data-color="default">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor Financeiro | v1.9.21+ (Original + Config + Toggle Cards)</title>
+    <title>Gestor Financeiro | v1.9.21+ (Completo com Config)</title>
 
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
@@ -14,164 +14,8 @@
     <link rel="stylesheet" href="css/style.css"> <!-- Seu CSS principal -->
     <!-- <link rel="icon" href="favicon.ico" type="image/x-icon"> -->
 
-    <!-- Estilos Embutidos (Com adições para visibilidade e features) -->
-    <style>
-        /* --- Estilos para Popups/Toasts --- */
-        .popup-container { position: fixed; bottom: 20px; right: 20px; z-index: 1070; display: flex; flex-direction: column-reverse; gap: 10px; max-width: 350px; pointer-events: none; }
-        .popup { background-color: rgba(50, 50, 50, 0.9); color: #fff; padding: 12px 18px; border-radius: 6px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); display: flex; align-items: center; opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: all; min-width: 280px; border-left: 4px solid transparent; }
-        .popup.show { opacity: 1; transform: translateY(0); }
-        .popup.hide { opacity: 0; }
-        .popup-icon { margin-right: 12px; font-size: 1.1em; flex-shrink: 0; }
-        .popup-message { flex-grow: 1; font-size: 0.9rem; line-height: 1.4; }
-        .popup-close { background: none; border: none; color: inherit; opacity: 0.6; cursor: pointer; font-size: 1.3em; padding: 0 0 0 15px; margin-left: auto; line-height: 1; flex-shrink: 0; }
-        .popup-close:hover { opacity: 1; }
-        .popup.success { background-color: rgba(40, 167, 69, 0.9); border-left-color: #1a7a32; }
-        .popup.success .popup-icon::before { content: "\f058"; font-family: "Font Awesome 6 Free"; font-weight: 900; } /* check-circle */
-        .popup.info { background-color: rgba(23, 162, 184, 0.9); border-left-color: #0f8194; }
-        .popup.info .popup-icon::before { content: "\f05a"; font-family: "Font Awesome 6 Free"; font-weight: 900; } /* info-circle */
-        .popup.warning { background-color: rgba(255, 193, 7, 0.9); border-left-color: #b88d05; color: #333; }
-        .popup.warning .popup-icon::before { content: "\f071"; font-family: "Font Awesome 6 Free"; font-weight: 900; } /* exclamation-triangle */
-        .popup.warning .popup-close { color: #333; }
-        .popup.danger { background-color: rgba(220, 53, 69, 0.9); border-left-color: #9e2131; }
-        .popup.danger .popup-icon::before { content: "\f06a"; font-family: "Font Awesome 6 Free"; font-weight: 900; } /* exclamation-circle */
-
-        /* Elementos desabilitados por permissão */
-        .action-disabled-permission { opacity: 0.6; cursor: not-allowed !important; pointer-events: none; }
-
-        /* Loading spinner */
-        #loadingIndicator { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(2px); text-align: center; }
-        [data-theme="dark"] #loadingIndicator { background-color: rgba(0, 0, 0, 0.7); color: #fff; }
-        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: var(--primary-color, #007bff); animation: spin 1s ease infinite; }
-        #loadingIndicator p { margin-top: 10px; font-size: 0.9rem; color: var(--text-color); }
-        [data-theme="dark"] #loadingIndicator p { color: #eee; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Ajustes visuais gerais */
-        .list-group-item .btn-sm { line-height: 1; }
-        .balance-method-actions { margin-left: 10px; }
-        .balance-method { display: flex; align-items: center; margin-bottom: 10px; }
-        .balance-method-input { margin-left: auto; max-width: 120px; }
-
-        /* Detalhes Transação */
-        .transaction-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 15px; margin-bottom: 1.5rem; }
-        .transaction-detail-grid > div { word-wrap: break-word; }
-        .detail-section { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color, #eee); }
-        .detail-section:first-of-type { border-top: none; }
-        #detailAttachment img { max-width: 150px; max-height: 100px; border: 1px solid #ccc; cursor: pointer; object-fit: cover; }
-
-        /* Editor de Categorias */
-        .category-editor .modal-body { max-height: 70vh; overflow-y: auto; }
-        #categoryEditorList .list-group-item { display: flex; align-items: center; padding: 0.5rem 0.75rem; margin-bottom: 5px; border-radius: 0.25rem; background-color: var(--card-bg); border: 1px solid var(--border-color); }
-        #categoryEditorList .list-group-item.is-title { font-weight: bold; background-color: var(--table-header-bg, #e9ecef); color: var(--table-header-color, #495057); margin-top: 10px; border-bottom-width: 2px; cursor: pointer; }
-        [data-theme="dark"] #categoryEditorList .list-group-item.is-title { background-color: var(--table-header-bg, #343a40); color: var(--table-header-color, #f8f9fa); }
-        #categoryEditorList .category-item-content { flex-grow: 1; display: flex; align-items: center; }
-        #categoryEditorList .category-name-display { flex-grow: 1; cursor: default; padding: 2px 5px; border-radius: 3px; border: 1px solid transparent; }
-        #categoryEditorList .is-title .category-name-display { cursor: pointer; }
-        #categoryEditorList .category-name-display:hover { background-color: rgba(0,0,0,0.05); }
-        [data-theme="dark"] #categoryEditorList .category-name-display:hover { background-color: rgba(255,255,255,0.1); }
-        #categoryEditorList .category-name-input { flex-grow: 1; margin-right: 5px; }
-        #categoryEditorList .category-actions { margin-left: auto; display: flex; gap: 5px; }
-        #categoryEditorList .category-actions .btn { padding: 0.1rem 0.4rem; font-size: 0.8em; line-height: 1; }
-        #categoryEditorList .drag-handle { cursor: grab; color: var(--text-muted); margin-right: 10px; font-size: 1.1em; opacity: 0.6; }
-        #categoryEditorList .drag-handle:hover { opacity: 1; }
-        #categoryEditorList .is-hidden { opacity: 0.5; background-color: repeating-linear-gradient( 45deg, var(--card-bg), var(--card-bg) 10px, var(--body-bg-secondary) 10px, var(--body-bg-secondary) 20px ); }
-        .category-toggle-icon { transition: transform 0.2s ease; }
-        .is-title.collapsed .category-toggle-icon { transform: rotate(-90deg); }
-        .sortable-ghost { opacity: 0.4; background-color: var(--primary-color-light) !important; }
-        .sortable-drag { opacity: 0.9 !important; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-
-        /* Visualizador de Fatura */
-        .invoice-viewer .modal-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 0.9rem; line-height: 1.5; color: var(--text-color); }
-        .invoice-viewer .invoice-header h2 { color: var(--primary-color, #0d6efd); }
-        .invoice-viewer .invoice-client-info { border-left: 3px solid var(--primary-color, #0d6efd); background-color: var(--body-bg-secondary); }
-        .invoice-items-table th { font-weight: 600; background-color: var(--table-header-bg); color: var(--table-header-color); border-color: var(--border-color); }
-        .invoice-items-table td { border-color: var(--border-color); }
-        .invoice-items-table tfoot { border-top: 2px solid var(--border-color); }
-        .invoice-items-table tfoot td { background-color: var(--table-header-bg); color: var(--table-header-color); }
-        .invoice-notes { border-top: 1px dashed var(--border-color); padding-top: 1rem; margin-top: 2rem; }
-        @media print { /* Estilos de impressão... */ }
-
-        /* Z-Index Modais */
-        .modal-overlay { z-index: 1050; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; overflow-y: auto; padding: 20px; }
-        .modal-overlay.active { display: flex; }
-        #alertModal, #confirmModal { z-index: 1060 !important; }
-        #pixPaymentModal { z-index: 1055 !important; }
-        .popup-container { z-index: 1070 !important; }
-        #loadingIndicator { z-index: 9999 !important; }
-
-        /* Outros */
-         #confirmModal .modal { max-width: 400px; }
-         .recipient-type-selector .btn { flex-grow: 1; }
-
-        /* Modal PIX */
-        #pixModalQrCodeImg { display: block; margin: 1rem auto; background-color: white; max-width: 250px; height: auto; border: 1px solid #ccc; padding: 5px;}
-        #pixModalCopyPasteKey { font-family: monospace; font-size: 0.8rem; background-color: var(--body-bg-secondary); }
-        #pixModalExpiryInfo { font-size: 0.9rem; }
-        #pixModalExpiryTimer { font-family: monospace; letter-spacing: 1px; }
-        #initiateRenewalBtn .fab.fa-pix::before, #pixPaymentModal .modal-title .fab.fa-pix::before { content: "\e40a"; font-family: "Font Awesome 6 Brands"; font-weight: 400; }
-        #initiateRenewalBtn .fab.fa-pix { margin-right: 0.3em; vertical-align: -0.1em; }
-
-        /* --- Estilos para Ocultar Cards de Saldo Individualmente --- */
-        .balance-card .card-header { position: relative; }
-        .balance-card .visibility-toggle-btn { position: absolute; top: 5px; right: 5px; padding: 0.1rem 0.35rem; font-size: 0.7em; line-height: 1; border-radius: 50%; background-color: rgba(128, 128, 128, 0.2); color: var(--text-muted); border: none; opacity: 0.4; transition: opacity 0.2s ease, background-color 0.2s ease; z-index: 2; cursor: pointer; }
-        .balance-card:hover .visibility-toggle-btn { opacity: 0.9; }
-        .balance-card .visibility-toggle-btn:hover { opacity: 1; background-color: rgba(128, 128, 128, 0.4); }
-        .balance-card.card-hidden { display: none; }
-
-        /* --- Estilo para features indisponíveis --- */
-        .feature-unavailable { opacity: 0.5; cursor: not-allowed; pointer-events: none; position: relative; user-select: none; }
-        /* Ícone de cadeado opcional */
-        .feature-unavailable.show-lock::before { content: '\f023'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; top: 5px; right: 5px; font-size: 0.7em; color: var(--danger-color, #dc3545); background-color: rgba(255, 255, 255, 0.8); padding: 1px 3px; border-radius: 3px; z-index: 1; }
-        [data-theme="dark"] .feature-unavailable.show-lock::before { background-color: rgba(0, 0, 0, 0.6); color: var(--warning-color, #ffc107); }
-        /* Desabilitar interações internas */
-        .feature-unavailable button, .feature-unavailable a, .feature-unavailable input,
-        .feature-unavailable select, .feature-unavailable textarea { pointer-events: none !important; opacity: 0.7 !important; }
-        .feature-unavailable:hover { transform: none !important; box-shadow: none !important; }
-
-        /* Editor Layout Dashboard */
-        #dashboard-widget-editor-list .list-group-item { cursor: default; }
-        #dashboard-widget-editor-list .drag-handle-widget { cursor: grab; opacity: 0.6; }
-        #dashboard-widget-editor-list .drag-handle-widget:hover { opacity: 1; }
-        #dashboard-widget-editor-list .widget-editor-name { flex-grow: 1; margin-left: 0.5rem; }
-        #dashboard-widget-editor-list .form-switch { margin-left: auto; padding-left: 2.5em; }
-        #dashboard-widget-editor-list .form-check-input { cursor: pointer; }
-        #dashboard-widget-editor-list .list-group-item.pro-disabled { opacity: 0.6; background-color: var(--body-bg-secondary); }
-        #dashboard-widget-editor-list .list-group-item.pro-disabled .form-check-input { cursor: not-allowed; filter: grayscale(1); }
-        #dashboard-widget-editor-list .list-group-item.pro-disabled .drag-handle-widget { cursor: not-allowed; }
-        .sortable-ghost-widget { background-color: var(--primary-color-light) !important; border: 1px dashed var(--primary-color) !important; }
-
-        /* --- Indicador Pro/Business Discreto --- */
-        .feature-badge {
-            font-size: 0.65em;
-            font-weight: 600;
-            padding: 0.15em 0.4em;
-            border-radius: 3px;
-            margin-left: 0.5em;
-            vertical-align: middle; /* Tenta alinhar melhor com o texto */
-            line-height: 1; /* Ajusta para não aumentar altura da linha */
-            position: relative; /* Permite ajuste fino se necessário */
-            top: -1px; /* Ajuste fino vertical */
-        }
-        .badge-pro {
-            background-color: rgba(var(--color-info-rgb, 13, 202, 240), 0.2);
-            color: var(--color-info, #0dcaf0);
-            border: 1px solid rgba(var(--color-info-rgb, 13, 202, 240), 0.4);
-        }
-        .badge-business {
-            background-color: rgba(var(--color-purple-rgb, 111, 66, 193), 0.15); /* Usando purple como exemplo */
-            color: var(--color-purple, #6f42c1);
-            border: 1px solid rgba(var(--color-purple-rgb, 111, 66, 193), 0.3);
-        }
-        [data-theme="dark"] .badge-pro {
-            background-color: rgba(var(--color-info-rgb, 13, 202, 240), 0.3);
-            border-color: rgba(var(--color-info-rgb, 13, 202, 240), 0.5);
-        }
-        [data-theme="dark"] .badge-business {
-            background-color: rgba(var(--color-purple-rgb, 111, 66, 193), 0.25);
-            border-color: rgba(var(--color-purple-rgb, 111, 66, 193), 0.4);
-        }
-
-    </style>
+    <!-- Estilos Embutidos (Incluindo o estilo para feature indisponível) -->
+    
 </head>
 
 <body data-theme="light">
@@ -224,33 +68,9 @@
         <!-- Dashboard (Estrutura Original com botões de visibilidade) -->
         <section class="content-section active" id="dashboard-section">
              <div class="dashboard-grid">
-                 <div class="card balance-card pix" id="pixBalanceCard">
-                     <div class="card-header">
-                         <div class="card-title">Saldo Pix</div>
-                         <i class="fas fa-qrcode"></i>
-                         <button class="btn btn-sm visibility-toggle-btn" data-card="pix" title="Ocultar/Mostrar Card"><i class="fas fa-eye"></i></button>
-                     </div>
-                     <div class="card-body"><div class="card-value" id="remainingBalancePix"><span class="monetary-value">R$ 0,00</span></div></div>
-                     <div class="card-footer"> <i class="fas fa-info-circle"></i> <span>Saldo p/ transferências</span> </div>
-                 </div>
-                 <div class="card balance-card cash" id="cashBalanceCard">
-                      <div class="card-header">
-                         <div class="card-title">Em Cédulas</div>
-                         <i class="fas fa-money-bill-wave"></i>
-                         <button class="btn btn-sm visibility-toggle-btn" data-card="cash" title="Ocultar/Mostrar Card"><i class="fas fa-eye"></i></button>
-                     </div>
-                     <div class="card-body"><div class="card-value" id="remainingBalanceCash"><span class="monetary-value">R$ 0,00</span></div></div>
-                     <div class="card-footer"> <i class="fas fa-info-circle"></i> <span>Dinheiro físico</span> </div>
-                 </div>
-                 <div class="card balance-card card-balance" id="cardBalanceCard">
-                      <div class="card-header">
-                         <div class="card-title">Conta/Cartão</div>
-                         <i class="fas fa-credit-card"></i>
-                          <button class="btn btn-sm visibility-toggle-btn" data-card="card" title="Ocultar/Mostrar Card"><i class="fas fa-eye"></i></button>
-                     </div>
-                     <div class="card-body"><div class="card-value" id="remainingBalanceCard"><span class="monetary-value">R$ 0,00</span></div></div>
-                     <div class="card-footer"> <i class="fas fa-info-circle"></i> <span>Saldo conta/débito</span> </div>
-                 </div>
+                 <div class="card balance-card pix" id="pixBalanceCard"> <div class="card-header"> <div class="card-title">Saldo Pix</div> <i class="fas fa-qrcode"></i> <button class="btn btn-sm visibility-toggle-btn" data-card="pix" title="Ocultar/Mostrar Card"><i class="fas fa-eye"></i></button> </div> <div class="card-body"><div class="card-value" id="remainingBalancePix"><span class="monetary-value">R$ 0,00</span></div></div> <div class="card-footer"> <i class="fas fa-info-circle"></i> <span>Saldo p/ transferências</span> </div> </div>
+                 <div class="card balance-card cash" id="cashBalanceCard"> <div class="card-header"> <div class="card-title">Em Cédulas</div> <i class="fas fa-money-bill-wave"></i> <button class="btn btn-sm visibility-toggle-btn" data-card="cash" title="Ocultar/Mostrar Card"><i class="fas fa-eye"></i></button> </div> <div class="card-body"><div class="card-value" id="remainingBalanceCash"><span class="monetary-value">R$ 0,00</span></div></div> <div class="card-footer"> <i class="fas fa-info-circle"></i> <span>Dinheiro físico</span> </div> </div>
+                 <div class="card balance-card card-balance" id="cardBalanceCard"> <div class="card-header"> <div class="card-title">Conta/Cartão</div> <i class="fas fa-credit-card"></i> <button class="btn btn-sm visibility-toggle-btn" data-card="card" title="Ocultar/Mostrar Card"><i class="fas fa-eye"></i></button> </div> <div class="card-body"><div class="card-value" id="remainingBalanceCard"><span class="monetary-value">R$ 0,00</span></div></div> <div class="card-footer"> <i class="fas fa-info-circle"></i> <span>Saldo conta/débito</span> </div> </div>
              </div>
              <div id="budgetSummaryCard" class="card budget-summary-card" style="display: none;"> <div class="card-header"> <div class="card-title"><i class="fas fa-wallet me-2"></i> Orçamento Mensal</div> </div> <div class="card-body"> <div class="budget-details mb-2"> <span>Gasto:</span> <strong id="budgetSpentDisplay"><span class="monetary-value">R$ 0,00</span></strong> <span> de </span> <strong id="budgetAmountDisplay"><span class="monetary-value">R$ 0,00</span></strong> </div> <div id="budgetProgress" class="progress-container budget-progress"> <div id="budgetProgressBar" class="progress-bar" style="width: 0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div> </div> </div> </div>
              <div class="card"> <div class="card-header"> <div class="card-title">Resumo das Metas</div> <button id="viewAllGoalsBtn" class="btn btn-sm btn-outline" data-action-permission="leitura"> Ver Todas </button> </div> <div class="card-body"> <div class="goals-summary"> <p class="text-muted text-center">Carregando resumo...</p> </div> </div> <div class="card-footer"> <button class="btn btn-sm btn-primary" id="addGoalBtnDashboard" data-action-permission="leitura"> <i class="fas fa-plus"></i> Nova Meta </button> </div> </div>
@@ -313,7 +133,7 @@
              <div class="card"> <div class="card-header d-flex justify-content-between align-items-center"> <h2 class="card-title mb-0">Renovação da Assinatura</h2> <button id="initiateRenewalBtn" class="btn btn-success"> <i class="fab fa-pix me-1"></i> Renovar Agora </button> </div> <div class="card-body"> <div id="renewalStatusInfo" class="alert alert-info mb-4" role="alert"> Carregando status da assinatura... </div> <h5 class="mb-3">Histórico de Renovações</h5> <div class="table-responsive"> <table class="table table-sm table-hover"> <thead> <tr> <th>Data Pedido</th> <th>Plano</th> <th>Valor</th> <th>Status</th> <th>Data Pgto/Exp.</th> <th>Ações</th> </tr> </thead> <tbody id="renewalHistoryTableBody"> <tr> <td colspan="6" class="text-center text-muted p-3">Carregando histórico...</td> </tr> </tbody> </table> </div> </div> </div>
         </section>
 
-        <!-- Configurações -->
+        <!-- Configurações (COM BLOCO DASHBOARD LAYOUT e VISIBILIDADE) -->
         <section class="content-section" id="settings-section">
              <div class="card">
                  <h2 class="card-title" style="padding: 1.5rem 1.5rem 0 1.5rem;">Configurações</h2>
@@ -324,8 +144,21 @@
                          <!-- Bloco Orçamento -->
                          <div class="card settings-block"> <div class="card-header"><h3 class="card-title"><i class="fas fa-calculator-alt me-2"></i> Orçamento</h3></div> <div class="card-body"> <p class="text-muted small mb-3">Defina um limite de gastos mensal.</p> <div class="form-group"> <label for="monthlyBudgetInput">Limite Mensal (R$)</label> <input type="number" id="monthlyBudgetInput" class="form-control form-control-sm monetary-input" placeholder="0,00" step="0.01" min="0" title="Defina o limite mensal de gastos (0 para desativar)."> </div> <small class="text-muted pro-feature">Orçamentos por categoria disponíveis no plano Pro.</small> <div class="mt-3 border-top pt-3"> <span class="small text-muted">Gasto no mês:</span> <strong id="budgetSpentDisplay"><span class="monetary-value">R$ 0,00</span></strong> / <strong id="budgetAmountDisplay"><span class="monetary-value">R$ 0,00</span></strong> <div id="budgetProgress" class="progress-container budget-progress mt-1" style="height: 5px; display: none;"> <div id="budgetProgressBar" class="progress-bar" style="width: 0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div> </div> </div> </div> <div class="card-footer"> <button id="saveBudgetBtn" class="btn btn-primary btn-sm" data-action-permission="financeiro"> <i class="fas fa-save"></i> Salvar Orçamento </button> </div> </div>
                          <!-- Bloco Perfil/Aparência -->
-                         <div class="card settings-block"> <div class="card-header"><h3 class="card-title"><i class="fas fa-user-cog me-2"></i> Perfil & Aparência</h3></div> <div class="card-body settings-form"> <div class="form-group"> <label for="userName">Nome</label> <input type="text" id="userName" class="form-control form-control-sm" placeholder="Seu Nome"> </div> <div class="form-group"> <label for="userEmail">Email</label> <input type="email" id="userEmail" class="form-control form-control-sm" placeholder="email@exemplo.com"> </div> <div class="form-group"> <label for="currency">Moeda</label> <select id="currency" class="form-select form-select-sm"> <option value="BRL">Real (R$)</option> <option value="USD">Dólar ($)</option> <option value="EUR">Euro (€)</option> </select> </div> <h4 class="mt-3 mb-2"><i class="fas fa-palette me-1"></i> Tema</h4> <div class="theme-options d-flex justify-content-between align-items-center mb-3"> <span class="small text-muted">Modo:</span> <div class="btn-group btn-group-sm"> <button class="btn btn-outline-secondary theme-mode-btn" data-mode="light"><i class="fas fa-sun"></i> Claro</button> <button class="btn btn-outline-secondary theme-mode-btn" data-mode="dark"><i class="fas fa-moon"></i> Escuro</button> <button class="btn btn-outline-secondary theme-mode-btn" data-mode="auto"><i class="fas fa-desktop"></i> Sistema</button> </div> </div> <div class="theme-options d-flex justify-content-between align-items-center mb-3"> <span class="small text-muted">Cor:</span> <div class="theme-colors"> <div class="theme-color-option" data-color="default" title="Padrão Azul"></div> <div class="theme-color-option" data-color="green" title="Verde"></div> <div class="theme-color-option" data-color="purple" title="Roxo"></div> <div class="theme-color-option" data-color="orange" title="Laranja"></div> <div class="theme-color-option" data-color="teal" title="Verde Água"></div> <div class="theme-color-option" data-color="pink" title="Rosa"></div> </div> </div> <h4 class="mt-4 mb-2"><i class="fas fa-eye me-1"></i> Visibilidade no Dashboard</h4> <p class="small text-muted mb-3">Controle quais cards de saldo aparecem no dashboard.</p> <div class="form-check form-switch mb-2"> <input class="form-check-input balance-visibility-config-toggle" type="checkbox" role="switch" id="configTogglePixCard" data-card-type="pix"> <label class="form-check-label" for="configTogglePixCard">Mostrar Card de Saldo PIX</label> </div> <div class="form-check form-switch mb-2"> <input class="form-check-input balance-visibility-config-toggle" type="checkbox" role="switch" id="configToggleCashCard" data-card-type="cash"> <label class="form-check-label" for="configToggleCashCard">Mostrar Card de Saldo Dinheiro</label> </div> <div class="form-check form-switch mb-2"> <input class="form-check-input balance-visibility-config-toggle" type="checkbox" role="switch" id="configToggleCardBalanceCard" data-card-type="card"> <label class="form-check-label" for="configToggleCardBalanceCard">Mostrar Card de Saldo Conta/Cartão</label> </div> </div> <div class="card-footer d-flex justify-content-between"> <button id="saveUserSettings" class="btn btn-primary btn-sm" data-action-permission="admin"> <i class="fas fa-save"></i> Salvar Preferências </button> <button id="resetBalanceCardVisibilityBtn" class="btn btn-outline-secondary btn-sm" title="Mostrar todos os cards de saldo no Dashboard"> <i class="fas fa-undo"></i> Restaurar Saldos Visíveis </button> </div> </div>
-                         <!-- Bloco Personalizar Dashboard -->
+                         <div class="card settings-block"> <div class="card-header"><h3 class="card-title"><i class="fas fa-user-cog me-2"></i> Perfil & Aparência</h3></div> <div class="card-body settings-form"> <div class="form-group"> <label for="userName">Nome</label> <input type="text" id="userName" class="form-control form-control-sm" placeholder="Seu Nome"> </div> <div class="form-group"> <label for="userEmail">Email</label> <input type="email" id="userEmail" class="form-control form-control-sm" placeholder="email@exemplo.com"> </div> <div class="form-group"> <label for="currency">Moeda</label> <select id="currency" class="form-select form-select-sm"> <option value="BRL">Real (R$)</option> <option value="USD">Dólar ($)</option> <option value="EUR">Euro (€)</option> </select> </div> <h4 class="mt-3 mb-2"><i class="fas fa-palette me-1"></i> Tema</h4> <div class="theme-options d-flex justify-content-between align-items-center mb-3"> <span class="small text-muted">Modo:</span> <div class="btn-group btn-group-sm"> <button class="btn btn-outline-secondary theme-mode-btn" data-mode="light"><i class="fas fa-sun"></i> Claro</button> <button class="btn btn-outline-secondary theme-mode-btn" data-mode="dark"><i class="fas fa-moon"></i> Escuro</button> <button class="btn btn-outline-secondary theme-mode-btn" data-mode="auto"><i class="fas fa-desktop"></i> Sistema</button> </div> </div> <div class="theme-options d-flex justify-content-between align-items-center mb-3"> <span class="small text-muted">Cor:</span> <div class="theme-colors"> <div class="theme-color-option" data-color="default" title="Padrão Azul"></div> <div class="theme-color-option" data-color="green" title="Verde"></div> <div class="theme-color-option" data-color="purple" title="Roxo"></div> <div class="theme-color-option" data-color="orange" title="Laranja"></div> <div class="theme-color-option" data-color="teal" title="Verde Água"></div> <div class="theme-color-option" data-color="pink" title="Rosa"></div> </div> </div>
+                            <!-- Controles de Visibilidade do Dashboard -->
+                            <h4 class="mt-4 mb-2"><i class="fas fa-eye me-1"></i> Visibilidade no Dashboard</h4>
+                            <p class="small text-muted mb-3">Controle quais cards de saldo aparecem no dashboard.</p>
+                            <div class="form-check form-switch mb-2"> <input class="form-check-input balance-visibility-config-toggle" type="checkbox" role="switch" id="configTogglePixCard" data-card-type="pix"> <label class="form-check-label" for="configTogglePixCard">Mostrar Card de Saldo PIX</label> </div>
+                            <div class="form-check form-switch mb-2"> <input class="form-check-input balance-visibility-config-toggle" type="checkbox" role="switch" id="configToggleCashCard" data-card-type="cash"> <label class="form-check-label" for="configToggleCashCard">Mostrar Card de Saldo Dinheiro</label> </div>
+                            <div class="form-check form-switch mb-2"> <input class="form-check-input balance-visibility-config-toggle" type="checkbox" role="switch" id="configToggleCardBalanceCard" data-card-type="card"> <label class="form-check-label" for="configToggleCardBalanceCard">Mostrar Card de Saldo Conta/Cartão</label> </div>
+                         </div>
+                         <div class="card-footer d-flex justify-content-between">
+                             <button id="saveUserSettings" class="btn btn-primary btn-sm" data-action-permission="admin"> <i class="fas fa-save"></i> Salvar Preferências </button>
+                             <button id="resetBalanceCardVisibilityBtn" class="btn btn-outline-secondary btn-sm" title="Mostrar todos os cards de saldo no Dashboard"> <i class="fas fa-undo"></i> Restaurar Saldos Visíveis </button>
+                         </div>
+                         </div>
+
+                         <!-- Bloco Personalizar Layout Dashboard -->
                          <div class="card settings-block"> <div class="card-header"> <h3 class="card-title"><i class="fas fa-columns me-2"></i>Layout do Dashboard</h3> </div> <div class="card-body"> <p class="text-muted small mb-3">Selecione os blocos (widgets) que deseja incluir e arraste <i class="fas fa-grip-vertical text-muted"></i> para reordenar. Widgets <span class="badge bg-info text-dark">Pro</span> requerem assinatura ativa.</p> <ul id="dashboard-widget-editor-list" class="list-group mb-3" style="max-height: 300px; overflow-y: auto;"> <li class="list-group-item text-center p-3"> <i class="fas fa-spinner fa-spin me-2"></i>Carregando opções... </li> </ul> </div> <div class="card-footer"> <button id="saveDashboardLayoutBtn" class="btn btn-primary btn-sm" data-action-permission="leitura"> <i class="fas fa-save me-1"></i> Salvar Config. Layout </button> <small class="text-muted ms-2">(Usado em futuras versões)</small> </div> </div>
                          <!-- Bloco Categorias (Pro) -->
                          <div class="card settings-block pro-feature" id="customCategoriesSettings"> <div class="card-header"><h3 class="card-title"><i class="fas fa-tags me-2"></i> Categorias</h3></div> <div class="card-body"> <p class="text-muted small mb-3">Gerencie suas categorias e títulos personalizados.</p> <button id="openCategoryEditorBtn" class="btn btn-primary" data-action-permission="financeiro"> <i class="fas fa-edit me-2"></i> Gerenciar Categorias </button> </div> </div>
@@ -349,7 +182,7 @@
     <!-- FAB (Floating Action Button) -->
     <button class="floating-action-btn" id="addTransactionBtn" title="Nova Transação" data-action-permission="leitura"> <i class="fas fa-plus"></i> </button>
 
-    <!-- ########## MODALS (Com conteúdo interno completo) ########### -->
+    <!-- ########## MODALS (Completo, incluindo todos os campos e elementos internos) ########### -->
     <div class="modal-overlay" id="transactionModal"> <div class="modal"> <div class="modal-header"> <h3 class="modal-title">Adicionar Transação</h3> <button class="modal-close" aria-label="Fechar">×</button> </div> <div class="modal-body"> <form id="transactionModalForm" novalidate> <div class="form-row"> <div class="form-group"> <label for="modalDate">Data *</label> <input type="date" id="modalDate" class="form-control" required> </div> <div class="form-group"> <label for="modalType">Tipo *</label> <select id="modalType" class="form-select" required> <option value="expense" selected>Despesa</option> <option value="income">Receita</option> </select> </div> </div> <div class="form-group"> <label for="modalItem">Descrição Curta *</label> <input type="text" id="modalItem" class="form-control" placeholder="Ex: Supermercado" required> </div> <div class="form-group"> <label for="modalDescription">Descrição Adicional</label> <textarea id="modalDescription" class="form-control" rows="2" placeholder="Ex: Compra mensal"></textarea> </div> <div class="form-row"> <div class="form-group"> <label for="modalAmount">Valor *</label> <input type="number" id="modalAmount" class="form-control monetary-input" placeholder="0,00" step="0.01" min="0.01" required> </div> <div class="form-group"> <label for="modalPaymentMethod">Modalidade *</label> <select id="modalPaymentMethod" class="form-select" required> <option value="" disabled selected>--Selecione--</option> <option value="pix">Pix</option> <option value="cash">Dinheiro</option> <option value="card">Conta/Cartão</option> </select> </div> </div> <div class="form-group"> <label for="modalCategory">Categoria *</label> <select id="modalCategory" class="form-select" required> <option value="" disabled selected>--Selecione--</option> </select> </div> <div class="form-group pro-feature pro-field"> <label for="modalTagsInput">Tags (vírgula)</label> <input type="text" id="modalTagsInput" class="form-control form-control-sm" placeholder="Ex: trabalho, urgente"> </div> <div class="form-group pro-feature pro-field"> <label>Comprovante</label> <div class="attachment-area"> <button type="button" class="btn btn-sm btn-outline-secondary" id="modalAttachmentTrigger"><i class="fas fa-paperclip"></i> Add</button> <input type="file" id="modalAttachmentInput" accept="image/*" style="display: none;"> <div class="attachment-preview-container mt-2" > <img id="modalAttachmentPreview" alt="Preview" style="display: none; max-height: 50px; max-width: 100px; margin-right: 10px; vertical-align: middle;"> <span id="modalAttachmentFilename" class="text-muted small" style="display:none; vertical-align: middle;"></span> <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="modalRemoveAttachmentBtn" style="display: none;" title="Remover"><i class="fas fa-times"></i></button> </div> </div> </div> <div class="form-row business-feature business-field"> <div class="form-group"> <label for="modalClientSelect">Cliente</label> <select id="modalClientSelect" class="form-select form-select-sm"><option value="">--</option></select> </div> <div class="form-group"> <label for="modalProjectSelect">Projeto</label> <select id="modalProjectSelect" class="form-select form-select-sm"><option value="">--</option></select> </div> </div> <div class="form-row business-feature business-field"> <div class="form-group"> <label for="modalEmployeeSelect">Funcionário</label> <select id="modalEmployeeSelect" class="form-select form-select-sm"><option value="">--</option></select> </div> <div class="form-group d-flex align-items-end"> <div class="form-check"> <input class="form-check-input" type="checkbox" id="modalDeductible"> <label class="form-check-label" for="modalDeductible"> Dedutível?</label> </div> </div> </div> <input type="hidden" id="modalOriginatingBillIdInput"> <small class="text-muted mt-3 d-block">* Obrigatório</small> <input type="hidden" id="modalAttachmentDataUrlHidden"> </form> </div> <div class="modal-footer"> <button type="button" class="btn btn-outline modal-close" id="cancelTransaction">Cancelar</button> <button type="submit" form="transactionModalForm" class="btn btn-primary" id="saveTransaction" data-action-permission="leitura">Salvar</button> </div> </div> </div>
     <div class="modal-overlay" id="editModal"> <div class="modal"> <div class="modal-header"> <h3 class="modal-title">Editar Transação</h3> <button class="modal-close" aria-label="Fechar">×</button> </div> <div class="modal-body"> <form id="editForm" novalidate> <input type="hidden" id="editTransactionId"> <div class="form-row"> <div class="form-group"> <label for="editDate">Data *</label> <input type="date" id="editDate" class="form-control" required> </div> <div class="form-group"> <label for="editType">Tipo *</label> <select id="editType" class="form-select" required><option value="expense">Despesa</option><option value="income">Receita</option></select> </div> </div> <div class="form-group"> <label for="editItem">Descrição *</label> <input type="text" id="editItem" class="form-control" required> </div> <div class="form-group"> <label for="editDescription">Detalhes</label> <textarea id="editDescription" class="form-control" rows="2"></textarea> </div> <div class="form-row"> <div class="form-group"> <label for="editAmount">Valor *</label> <input type="number" id="editAmount" class="form-control monetary-input" placeholder="0,00" step="0.01" min="0.01" required> </div> <div class="form-group"> <label for="editPaymentMethod">Modalidade *</label> <select id="editPaymentMethod" class="form-select" required><option value="" disabled>--</option><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="card">Conta/Cartão</option></select> </div> </div> <div class="form-group"> <label for="editCategory">Categoria *</label> <select id="editCategory" class="form-select" required><option value="" disabled>--</option></select> </div> <div class="form-group pro-feature pro-field"> <label for="editTagsInput">Tags (vírgula)</label> <input type="text" id="editTagsInput" class="form-control form-control-sm"> </div> <div class="form-group pro-feature pro-field"> <label>Comprovante</label> <div class="attachment-area"> <button type="button" class="btn btn-sm btn-outline-secondary" id="editAttachmentTrigger"><i class="fas fa-paperclip"></i> Add/Alterar</button> <input type="file" id="editAttachmentInput" accept="image/*" style="display: none;"> <div class="attachment-preview-container mt-2" > <img id="editAttachmentPreview" alt="Preview Comprovante" style="display: none; max-height: 50px; max-width: 100px; margin-right: 10px; vertical-align: middle;"> <span id="editAttachmentFilename" class="text-muted small" style="display: none; vertical-align: middle;"></span> <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="editRemoveAttachmentBtn" style="display: none;" title="Remover Comprovante"><i class="fas fa-times"></i></button> </div> </div> </div> <div class="form-row business-feature business-field"> <div class="form-group"> <label for="editClientSelect">Cliente</label> <select id="editClientSelect" class="form-select form-select-sm"><option value="">--</option></select> </div> <div class="form-group"> <label for="editProjectSelect">Projeto</label> <select id="editProjectSelect" class="form-select form-select-sm"><option value="">--</option></select> </div> </div> <div class="form-row business-feature business-field"> <div class="form-group"> <label for="editEmployeeSelect">Funcionário</label> <select id="editEmployeeSelect" class="form-select form-select-sm"><option value="">--</option></select> </div> <div class="form-group d-flex align-items-end"> <div class="form-check"> <input class="form-check-input" type="checkbox" id="editDeductible"> <label class="form-check-label" for="editDeductible"> Dedutível?</label> </div> </div> </div> <small class="text-muted mt-3 d-block">* Obrigatório</small> <input type="hidden" id="editAttachmentDataUrlHidden"> </form> </div> <div class="modal-footer"> <button type="button" class="btn btn-outline modal-close" id="cancelEdit">Cancelar</button> <button type="submit" form="editForm" class="btn btn-primary" id="saveEdit" data-action-permission="leitura">Salvar Alterações</button> </div> </div> </div>
     <div class="modal-overlay" id="transactionDetailModal"> <div class="modal"> <div class="modal-header"> <h3 class="modal-title">Detalhes da Transação</h3> <button class="modal-close" aria-label="Fechar">×</button> </div> <div class="modal-body"> <div class="transaction-detail-grid"> <div><strong>ID:</strong> <span id="detailId">-</span></div> <div><strong>Data:</strong> <span id="detailDate">-</span></div> <div><strong>Tipo:</strong> <span id="detailType">-</span></div> <div><strong>Valor:</strong> <span id="detailAmount">-</span></div> <div class="grid-col-span-2"><strong>Descrição:</strong> <span id="detailItem">-</span></div> <div><strong>Categoria:</strong> <span id="detailCategory">-</span></div> <div><strong>Modalidade:</strong> <span id="detailPaymentMethod">-</span></div> </div> <div class="detail-section" id="originContainer" style="display: none;"> <strong id="detailOriginLabel">Origem:</strong> <span id="detailOrigin">-</span> </div> <div class="detail-section" id="descriptionContainer" style="display: none;"> <strong>Detalhes Adicionais:</strong> <p class="text-muted mb-0" id="detailDescription">-</p> </div> <div class="detail-section pro-feature" id="tagsContainer" style="display: none;"> <strong>Tags:</strong> <span id="detailTags">-</span> </div> <div class="detail-section business-feature" id="businessInfoContainer" style="display: none;"> <strong>Informações Adicionais:</strong> <div class="d-flex flex-wrap gap-2 mt-1" id="detailBusinessInfo">-</div> </div> <div class="detail-section pro-feature" id="attachmentContainer" style="display: none;"> <strong>Comprovante:</strong> <div id="detailAttachment" class="mt-2">-</div> </div> </div> <div class="modal-footer"> <button type="button" class="btn btn-outline modal-close">Fechar</button> </div> </div> </div>
